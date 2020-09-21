@@ -3,7 +3,7 @@
 
 # <table align="left">
 #   <td>
-#     <a target="_blank" href="https://colab.research.google.com/github/J-TKim/Gans_in_actiong/Ch2/Ch2_Autoencoder.ipynb"><img src="https://www.tensorflow.org/images/colab_logo_32px.png" />구글 코랩에서 실행하기</a>
+#     <a target="_blank" href="https://colab.research.google.com/github/J-TKim/Gans_in_action/blob/master/Ch2/Ch2_Autoencoder.ipynb.ipynb"><img src="https://www.tensorflow.org/images/colab_logo_32px.png" />구글 코랩에서 실행하기</a>
 #   </td>
 # </table>
 
