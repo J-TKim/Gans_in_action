@@ -134,6 +134,8 @@ def pixelwize_feat_norm(input, **kwargs):
     return inputs / normalization_constant
 
 
+# ## ProGAN 실행하기
+
 # In[6]:
 
 
@@ -155,4 +157,171 @@ interpolated_images = module(latent_vector)
 
 plt.imshow(interpolated_images.numpy().reshape(128,128,3))
 plt.show()
+
+
+# ## ProGAN 확장하기
+# 
+# [Chapter_6_ProGAN.ipynb (by rickiepark)](https://github.com/rickiepark/gans-in-action/blob/master/chapter-6/Chapter_6_ProGAN.ipynb)를 보고 작성
+
+# ### TF-Hub 이미지 생성 모델
+
+# In[7]:
+
+
+# TFHub 이미지 생성 모델
+from absl import logging
+import imageio
+import matplotlib.pyplot as plt
+import numpy as np
+import tensorflow as tf
+import tensorflow_hub as hub
+import time
+from IPython import display
+from skimage import transform
+
+# 어떤 모델을 사용할지 사전에 모른다면
+# module.get_input_shape()로 이 값을 얻을 수 있습니다.
+latent_dim = 512
+
+# 0이 아니고 원점을 통과하는 직선에 놓여 있지 않은 두 벡터 사이를 보간합니다.
+# 먼저 v2를 정규화하여 v1과 같은 노름을 가지도록 만듭니다.
+# 그 다음 초구(hypersphere)에 있는 두 벡터 사이를 보간합니다.
+def interpolate_hypersphere(v1, v2, num_steps):
+    v1_norm = tf.norm(v1)
+    v2_norm = tf.norm(v2)
+    v2_normalized = v2 * (v1_norm / v2_norm)
+    
+    vectors = []
+    for step in range(num_steps):
+        interpolated = v1 + (v2_normalized - v1) * step / (num_steps - 1)
+        interpolated_norm = tf.norm(interpolated)
+        interpolater_normalized = interpolated * (v1_norm / interpolated_norm)
+        vectors.append(interpolater_normalized)
+    return tf.stack(vectors)
+
+# 일련의 이미지에서 애니메이션을 만듭니다.
+def animate(images):
+    images = np.array(images)
+    converted_images = np.clip(images * 255, 0, 255).astype(np.uint8)
+    imageio.mimsave("./animation.gif", converted_images)
+    with open("./animation.gif", 'rb') as f:
+        display.display(display.Image(data=f.read(), height=300))
+        
+# 간단히 이미지를 출력합니다.
+def display_image(image):
+    plt.figure()
+    plt.axis("off")
+    plt.imshow(image)
+    
+# 여러 개의 이미지를 하나의 그림으로 출력합니다.
+def display_images(images, captions=None):
+    num_horizontally = 5
+    f, axes = plt.subplots(len(images) // num_horizontally, num_horizontally, figsize=(20, 20))
+    for i in range(len(images)):
+        axes[i // num_horizontally, i % num_horizontally].axis("off")
+        if captions is not None:
+            axes[i // num_horizontally, i % num_horizontally].text(0, -3, captions[i])
+        axes[i // num_horizontally, i % num_horizontally].imshow(images[i])
+    f.tight_layout()
+    
+logging.set_verbosity(logging.ERROR)
+
+
+# ### 잠재 공간 보간
+# 
+# 두 개의 랜덤한 초기 벡터 사이의 잠재 공간 보간.
+
+# In[8]:
+
+
+def interpolate_between_vectors():
+    module = hub.KerasLayer("https://tfhub.dev/google/progan-128/1")
+
+    # 다른 랜덤 벡터를 사용하려면 시드 값을 변경하세요.
+    v1 = tf.random.normal([latent_dim], seed=3)
+    v2 = tf.random.normal([latent_dim], seed=1)
+
+    # v1과 v2 사이 25개의 스텝을 담은 보간 텐서를 만듭니다.
+    vectors = interpolate_hypersphere(v1, v2, 25)
+
+    # 모듈을 사용해 잠재 공간에서 이미지를 생성합니다.
+    interpolated_images = module(vectors)
+
+    animate(interpolated_images)
+
+interpolate_between_vectors()
+
+
+# ### 잠재 공간에서 가장 가까운 벡터 찾기
+# 
+# 타깃 이미지를 고정하기 위해 모듈이 생성한 이미지를 업로드하여 사용
+
+# In[9]:
+
+
+image_from_module_space = True
+
+def get_module_space_image():
+    module = hub.KerasLayer("https://tfhub.dev/google/progan-128/1")
+    vector = tf.random.normal([1, latent_dim], seed=4)
+    images = module(vector)
+    return images[0]
+
+def upload_image():
+    uploaded = files.upload()
+    image = imageio.imread(uploaded[uploaded.keys()[0]])
+    return transform.resize(image, [128, 128])
+
+if image_from_module_space:
+    target_image = get_module_space_image()
+else:
+    target_image = upload_image()
+display_image(target_image)
+
+
+# In[10]:
+
+
+def find_closet_latent_vector(num_optimization_steps, steps_per_image):
+    images = []
+    losses = []
+    module = hub.KerasLayer("https://tfhub.dev/google/progan-128/1")
+    
+    initial_vector = tf.random.normal([1, latent_dim], seed = 5)
+    
+    vector = tf.Variable(initial_vector)
+    optimizer = tf.optimizers.Adam(learning_rate=0.01)
+    loss_fn = tf.losses.MeanAbsoluteError(reduction="sum")
+    
+    for step in range(num_optimization_steps):
+        if (step % 100) == 0:
+            print()
+        print(".", end="")
+        with tf.GradientTape() as tape:
+            image = module(vector.read_value())
+            if (step % steps_per_image) == 0:
+                images.append(image.numpy().reshape(128, 128, 3))
+            target_image_difference = loss_fn(image, target_image[:, :, :3])
+            """
+            잠재 벡터는 정규 분포에서 샘플링했습니다.
+            잠재 벡터의 길이를 이 분포에서 얻은 벡터의 평균 길이로 제한하면
+            더 실제 같은 이미지를 얻을 수 있습니다.
+            """
+            regulizer = tf.abs(tf.norm(vector) - np.sqrt(latent_dim))
+            
+            loss = target_image_difference + regulizer
+            losses.append(loss.numpy())
+        grads = tape.gradient(loss, [vector])
+        optimizer.apply_gradients(zip(grads, [vector]))
+        
+    return images, losses
+
+result = find_closet_latent_vector(num_optimization_steps=200, steps_per_image=5)
+
+
+# In[11]:
+
+
+captions = [f"Loss: {l:.2}" for  l in result[1]]
+display_images(result[0], captions)
 
