@@ -335,6 +335,30 @@ sample_interval = 800
 train(iterations, batch_size, sample_interval)
 
 
+# In[13]:
+
+
+# 코드 7-11 정확도 체크
+x, y = dataset.test_set()
+y = to_categorical(y, num_classes=num_classes)
+
+# 테스트 세트에서 분류 정확도 계산
+_, accuracy = discriminator_supervised.evaluate(x, y)
+print("테스트 정확도:%.2f%%" % (100 * accuracy))
+
+
+# In[14]:
+
+
+# 코드 7-12 완전한 지도 학습으로 훈련한 분류기
+# SGAN 판별자와 같은 네트워크 구조를 가진 지도 학습 분류기
+mnist_classifier = build_discriminator_supervised(build_discriminator_net(img_shape))
+
+mnist_classifier.compile(loss = "categorical_crossentropy",
+                        metrics=["accuracy"],
+                        optimizer=Adam())
+
+
 # In[ ]:
 
 
