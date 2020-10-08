@@ -12,3 +12,4 @@ GAN 인 액션(한빛미디어, 2020)의 실습 코드를 저장 해 두었습�
 - Ch2 : VAE(Variational AutoEncoder)
 - Ch3 : GAN(Generactive Adversarial Network)
 - Ch4 : DCGAN(Deep Convolutional Generactive Adversarial Network)
+- Ch6 : ProGAN(Progressive Growing of GANs)
