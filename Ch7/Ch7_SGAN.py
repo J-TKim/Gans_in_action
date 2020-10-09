@@ -338,7 +338,35 @@ train(iterations, batch_size, sample_interval)
 # In[13]:
 
 
-# 코드 7-11 정확도 체크
+losses = np.array(supervised_losses)
+
+# 판별자의 지도 학습 손실을 그립니다.
+plt.figure(figsize=(15, 5))
+plt.plot(iteration_checkpoints, losses, label="Discriminator loss")
+
+plt.xticks(iteration_checkpoints, rotation=90)
+
+plt.title("Discriminator – Supervised Loss")
+plt.xlabel("Iteration")
+plt.ylabel("Loss")
+plt.legend()
+plt.show()
+
+
+# In[14]:
+
+
+x, y = dataset.training_set()
+y = to_categorical(y, num_classes=num_classes)
+
+# 훈련 세트에서 분류 정확도 계산
+_, accuracy = discriminator_supervised.evaluate(x, y)
+print("Training Accuracy: %.2f%%" % (100 * accuracy))
+
+
+# In[15]:
+
+
 x, y = dataset.test_set()
 y = to_categorical(y, num_classes=num_classes)
 
@@ -347,7 +375,7 @@ _, accuracy = discriminator_supervised.evaluate(x, y)
 print("테스트 정확도:%.2f%%" % (100 * accuracy))
 
 
-# In[14]:
+# In[16]:
 
 
 # 코드 7-12 완전한 지도 학습으로 훈련한 분류기
@@ -359,8 +387,64 @@ mnist_classifier.compile(loss = "categorical_crossentropy",
                         optimizer=Adam())
 
 
-# In[ ]:
+# In[17]:
 
 
+imgs, labels = dataset.training_set()
 
+# 레이블을 원-핫 인코딩합니다.
+labels = to_categorical(labels, num_classes=num_classes)
+
+# 분류기를 훈련합니다.
+training = mnist_classifier.fit(x=imgs,
+                                y=labels,
+                                batch_size=32,
+                                epochs=30,
+                                verbose=1)
+losses = training.history['loss']
+accuracies = training.history['accuracy']
+
+
+# In[18]:
+
+
+# 분류 손실을 그립니다
+plt.figure(figsize=(10, 5))
+plt.plot(np.array(losses), label="Loss")
+plt.title("Classification Loss")
+plt.legend()
+plt.show()
+
+
+# In[19]:
+
+
+# 분류 정확도를 그립니다.
+plt.figure(figsize=(10, 5))
+plt.plot(np.array(accuracies), label="Accuracy")
+plt.title("Classification Accuracy")
+plt.legend()
+plt.show()
+
+
+# In[20]:
+
+
+x, y = dataset.training_set()
+y = to_categorical(y, num_classes=num_classes)
+
+# 훈련 세트에 대한 분류 정확도를 계산합니다.
+_, accuracy = mnist_classifier.evaluate(x, y)
+print("Training Accuracy: %.2f%%" % (100 * accuracy))
+
+
+# In[21]:
+
+
+x, y = dataset.test_set()
+y = to_categorical(y, num_classes=num_classes)
+
+# 테스트 세트에 대한 분류 정확도를 계산합니다.
+_, accuracy = mnist_classifier.evaluate(x, y)
+print("Test Accuracy: %.2f%%" % (100 * accuracy))
 
