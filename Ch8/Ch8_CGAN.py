@@ -315,3 +315,39 @@ sample_interval = 1000
 
 train(iterations, batch_size, sample_interval)
 
+
+# In[12]:
+
+
+# 그리드 차원을 설정합니다.
+image_grid_rows = 10
+image_grid_columns = 5
+
+# 랜덤한 잡음을 샘플링 합니다.
+z = np.random.normal(0, 1, (image_grid_rows * image_grid_columns, z_dim))
+
+# 생성할 이미지 레이블을 5개씩 준비합니다.
+labels_to_generate = np.array([[i for j in range(5)] for i in range(10)])
+labels_to_generate = labels_to_generate.flatten().reshape(-1, 1)
+
+# 랜덤한 잡음에서 이미지를 생성합니다.
+gen_imgs = generator.predict([z, labels_to_generate])
+
+# 이미지 픽셀 값을 [0, 1] 사이로 스케일을 변환합니다.
+gen_imgs = 0.5 * gen_imgs + 0.5
+
+# 이미지 그리드를 설정합니다.
+fig, axs = plt.subplots(image_grid_rows,
+                        image_grid_columns,
+                        figsize=(10, 20),
+                        sharey=True,
+                        sharex=True)
+
+cnt = 0
+for i in range(image_grid_rows):
+    for j in range(image_grid_columns):
+        axs[i, j].imshow(gen_imgs[cnt, :, :, 0], cmap="gray")
+        axs[i, j].axis("off")
+        axs[i, j].set_title("Digit: %d" % labels_to_generate[cnt]) ## NEW
+        cnt += 1
+
