@@ -9,7 +9,9 @@ GAN 인 액션(한빛미디어, 2020)의 실습 코드를 저장 해 두었습�
 이 코드는 텐서플로 2.1 버전, __Tesla V100 32gb__ 에서 테스트했습니다.
 
 ### 목차
-- Ch2 : VAE(Variational AutoEncoder)
-- Ch3 : GAN(Generactive Adversarial Network)
-- Ch4 : DCGAN(Deep Convolutional Generactive Adversarial Network)
-- Ch6 : ProGAN(Progressive Growing of GANs)
+- Ch2 : [VAE(Variational AutoEncoder)](https://github.com/J-TKim/Gans_in_action/blob/master/Ch2/Ch2_Autoencoder.ipynb)
+- Ch3 : [GAN(Generactive Adversarial Network)](https://github.com/J-TKim/Gans_in_action/blob/master/Ch3/Ch3_GAN.ipynb)
+- Ch4 : [DCGAN(Deep Convolutional Generactive Adversarial Network)](https://github.com/J-TKim/Gans_in_action/blob/master/Ch4/Ch4_DCGAN.ipynb)
+- Ch6 : [ProGAN(Progressive Growing of GANs)](https://github.com/J-TKim/Gans_in_action/blob/master/Ch6/Ch6_ProGAN.ipynb)
+- Ch7 : [SGAN(Semi-supervised Generactive Adversarial Network)](https://github.com/J-TKim/Gans_in_action/blob/master/Ch7/Ch7_SGAN.ipynb)
+- Ch8 : [CGAN(Conditional Generactive Adversarial Network)](https://github.com/J-TKim/Gans_in_action/blob/master/Ch8/Ch8_CGAN.ipynb)
