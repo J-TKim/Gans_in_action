@@ -15,3 +15,4 @@ GAN 인 액션(한빛미디어, 2020)의 실습 코드를 저장 해 두었습�
 - Ch6 : [ProGAN(Progressive Growing of GANs)](https://github.com/J-TKim/Gans_in_action/blob/master/Ch6/Ch6_ProGAN.ipynb)
 - Ch7 : [SGAN(Semi-supervised Generactive Adversarial Network)](https://github.com/J-TKim/Gans_in_action/blob/master/Ch7/Ch7_SGAN.ipynb)
 - Ch8 : [CGAN(Conditional Generactive Adversarial Network)](https://github.com/J-TKim/Gans_in_action/blob/master/Ch8/Ch8_CGAN.ipynb)
+- Ch9 : [CycleGAN(Cycle-Consistent Adversarial Networks)](https://github.com/J-TKim/Gans_in_action/blob/master/Ch9/Ch9_CycleGAN.ipynb)
